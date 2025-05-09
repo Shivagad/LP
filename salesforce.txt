@@ -1,0 +1,640 @@
+public class Arraynumsum {
+    
+     public static integer sumarray(List<integer>arr)
+     {
+         if(arr.size()==0)
+         {
+             throw new IllegalArgumentException('array should not be empty');
+         }
+         integer sum=0;
+         for(integer i=0;i<arr.size();i++)
+         {
+             sum+=arr[i];
+         }
+         return sum;
+     }
+}
+
+
+
+/*
+ List<Integer> array1 = new List<Integer>{1, 2, 3, 4, 5};
+
+integer result=Arraynumsum.sumarray(array1);
+
+System.debug('Result of Array Addition: ' + result);
+ */
+
+
+
+
+/*
+    Subject: Cloud Computing
+    Problem Statement: Create following application in apex Programming Language:
+        1. Mathematical Calculator
+        2. Generate student mark sheet
+
+    Selected: Mathematical Calculator
+*/
+
+// Test Cases to run debug more
+/*
+System.debug( Calculator.evaluate( '2 + 3' ) ) ;
+System.debug( Calculator.evaluate( '2 * 3' ) ) ;
+System.debug( Calculator.evaluate( '2 - 3' ) ) ;
+System.debug( Calculator.evaluate( '2 / 3' ) ) ;
+*/
+
+public class Calculator {
+    
+    public static Double evaluate( String expression ) {
+        List<String> parts = expression.split( ' ' ) ;
+        if (parts.Size() != 3) {
+            CalloutException e = new CalloutException();
+    		e.setMessage( 'Malformed input received' );
+    		throw e;
+        }
+        Double operand1 = Double.valueOf( parts[0] ) ; 
+        Double operand2 = Double.valueOf( parts[2] ) ;
+        String operator = parts[1] ; 
+        Double result = 0.0 ; 
+        switch on operator {
+            when '+' {
+                result = operand1 + operand2 ;
+            }
+            when '-' {
+                result = operand1 - operand2 ; 
+            }
+            when '*' {
+                result = operand1 * operand2 ; 
+            }
+            when '/' {
+                result = operand1 / operand2 ; 
+            }
+        }
+        return result;
+    }
+}
+
+public class StudentManagement {
+    
+   
+    public static void createStud(String studentName, String email, Integer rollNumber) {
+     
+        List<Student__c> existingStudents = [SELECT Id FROM Student__c WHERE Roll_Number__c = :rollNumber LIMIT 1];
+        if (!existingStudents.isEmpty()) {
+            throw new CalloutException('Roll Number already exists.');
+        }
+         
+       
+        Student__c newStudent = new Student__c(
+            Name = studentName,
+            Email__c = email,
+            Roll_Number__c = rollNumber
+        );
+        
+        insert newStudent;
+    }
+
+
+    public static Student__c getStud(Integer rollNumber) {
+        List<Student__c> students = [SELECT Id, Name, Email__c, Roll_Number__c FROM Student__c WHERE Roll_Number__c = :rollNumber LIMIT 1];
+        if (students.isEmpty()) {
+            throw new CalloutException('Student not found.');
+        }
+        return students[0];
+    }
+}
+
+
+
+
+/*
+ List<Integer> array1 = new List<Integer>{1, 2, 3, 4, 5};
+List<Integer> array2 = new List<Integer>{10, 20, 30, 40, 50};
+
+List<Integer> result = ArrayAddition.addArrays(array1, array2);
+
+System.debug('Result of Array Addition: ' + result);
+*/
+
+public class ArrayAddition {
+
+    // Method to perform array (list) addition
+    public static List<Integer> addArrays(List<Integer> arr1, List<Integer> arr2) {
+        // Validate equal length
+        if (arr1.size() != arr2.size()) {
+            throw new IllegalArgumentException('Arrays must be of equal length');
+        }
+
+        List<Integer> result = new List<Integer>();
+
+        for (Integer i = 0; i < arr1.size(); i++) {
+            result.add(arr1[i] + arr2[i]);
+        }
+
+        return result;
+    }
+}
+
+
+public class InterestCalculatorController {
+    // Public properties with getters and setters
+    public Double principal { get; set; }
+    public Double rate { get; set; }
+    public Double time1 { get; set; }
+    
+    public Double simpleInterest { get; set; }
+    public Double compoundInterest { get; set; }
+
+    // Method to calculate Simple and Compound Interest
+    public void calculateInterest() {
+        // Calculate Simple Interest
+        simpleInterest = (principal * rate * time1) / 100;
+
+        // Calculate Compound Interest (using Math.pow)
+        compoundInterest = principal * (Math.pow((1 + rate / 100), time1)) - principal;
+    }
+}
+
+
+
+public class GeometryAreaCalculator {
+
+    // Circle: π * r²
+    public static Decimal areaOfCircle(Decimal radius) {
+        return Math.PI * radius * radius;
+    }
+
+    // Rectangle: length * width
+    public static Decimal areaOfRectangle(Decimal length, Decimal width) {
+        return length * width;
+    }
+
+    // Triangle: ½ * base * height
+    public static Decimal areaOfTriangle(Decimal base, Decimal height) {
+        return 0.5 * base * height;
+    }
+
+    // Square: side²
+    public static Decimal areaOfSquare(Decimal side) {
+        return side * side;
+    }
+
+    // Parallelogram: base * height
+    public static Decimal areaOfParallelogram(Decimal base, Decimal height) {
+        return base * height;
+    }
+
+    // Trapezium: ½ * (a + b) * height
+    public static Decimal areaOfTrapezium(Decimal a, Decimal b, Decimal height) {
+        return 0.5 * (a + b) * height;
+    }
+
+    // Ellipse: π * a * b
+    public static Decimal areaOfEllipse(Decimal a, Decimal b) {
+        return Math.PI * a * b;
+    }
+
+    // Sample demo method
+    public static void calculateAllAreas() {
+        System.debug('Circle: ' + areaOfCircle(5));
+        System.debug('Rectangle: ' + areaOfRectangle(4, 6));
+        System.debug('Triangle: ' + areaOfTriangle(3, 7));
+        System.debug('Square: ' + areaOfSquare(5));
+        System.debug('Parallelogram: ' + areaOfParallelogram(6, 4));
+        System.debug('Trapezium: ' + areaOfTrapezium(3, 5, 4));
+        System.debug('Ellipse: ' + areaOfEllipse(3, 6));
+    }
+}
+
+
+public class CurrencyConverter {
+
+    // Exchange rates: 1 unit of FROM currency equals this many TO units
+    // These are just example fixed rates for illustration.
+    public static Map<String, Decimal> exchangeRates = new Map<String, Decimal>{
+        'USD_TO_INR' => 83.25,
+        'USD_TO_EUR' => 0.93,
+        'USD_TO_GBP' => 0.80,
+        'INR_TO_USD' => 0.012,
+        'EUR_TO_USD' => 1.08,
+        'GBP_TO_USD' => 1.25
+    };
+
+    // Method to convert currency
+    public static Decimal convertCurrency(String fromCurrency, String toCurrency, Decimal amount) {
+        String key = fromCurrency + '_TO_' + toCurrency;
+        if (exchangeRates.containsKey(key)) {
+            return amount * exchangeRates.get(key);
+        } else {
+            System.debug('Conversion rate not available for ' + key);
+            return -1;
+        }
+    }
+
+    // Demo method to show usage
+    public static void demoConversion() {
+        Decimal usdToInr = convertCurrency('USD', 'INR', 100);
+        Decimal inrToUsd = convertCurrency('INR', 'USD', 1000);
+        Decimal usdToEur = convertCurrency('USD', 'EUR', 100);
+
+        System.debug('100 USD in INR: ' + usdToInr);
+        System.debug('1000 INR in USD: ' + inrToUsd);
+        System.debug('100 USD in EUR: ' + usdToEur);
+    }
+}
+
+
+public class CurrencyConverterController {
+    public String fromCurrency { get; set; }
+    public String toCurrency { get; set; }
+    public Decimal amount { get; set; }
+    public Decimal result { get; set; }
+    public String message { get; set; }
+
+    // Conversion rate map (e.g., 'USD_TO_INR' → 83.25)
+    public static final Map<String, Decimal> conversionRates = new Map<String, Decimal>{
+        'USD_TO_INR' => 83.25,
+        'INR_TO_USD' => 1 / 83.25,
+        'USD_TO_EUR' => 0.93,
+        'EUR_TO_USD' => 1 / 0.93,
+        'USD_TO_GBP' => 0.80,
+        'GBP_TO_USD' => 1 / 0.80
+    };
+
+    public List<SelectOption> getCurrencyOptions() {
+        return new List<SelectOption>{
+            new SelectOption('USD', 'USD'),
+            new SelectOption('INR', 'INR'),
+            new SelectOption('EUR', 'EUR'),
+            new SelectOption('GBP', 'GBP')
+        };
+    }
+
+    public PageReference convert() {
+        if (fromCurrency == null || toCurrency == null || amount == null) {
+            message = 'Please fill all fields.';
+            return null;
+        }
+
+        String key = fromCurrency + '_TO_' + toCurrency;
+
+        if (conversionRates.containsKey(key)) {
+            result = amount * conversionRates.get(key);
+            message = 'Converted amount: ' + result;
+        } else {
+            message = 'Conversion not supported for ' + key;
+        }
+
+        return null;
+    }
+}
+
+
+
+public class TemperatureConverter {
+
+    // Method to convert temperature between different units
+    public static Decimal convertTemperature(Decimal temperature, String fromUnit, String toUnit) {
+        Decimal result;
+
+        // Perform the conversion based on units
+        if (fromUnit == 'Celsius' && toUnit == 'Fahrenheit') {
+            result = (temperature * 9 / 5) + 32;
+        } else if (fromUnit == 'Celsius' && toUnit == 'Kelvin') {
+            result = temperature + 273.15;
+        } else if (fromUnit == 'Fahrenheit' && toUnit == 'Celsius') {
+            result = (temperature - 32) * 5 / 9;
+        } else if (fromUnit == 'Fahrenheit' && toUnit == 'Kelvin') {
+            result = (temperature - 32) * 5 / 9 + 273.15;
+        } else if (fromUnit == 'Kelvin' && toUnit == 'Celsius') {
+            result = temperature - 273.15;
+        } else if (fromUnit == 'Kelvin' && toUnit == 'Fahrenheit') {
+            result = (temperature - 273.15) * 9 / 5 + 32;
+        } else {
+            // Invalid conversion
+            throw new IllegalArgumentException('Invalid temperature conversion.');
+        }
+        
+        return result;
+    }
+
+    // Example usage method
+    public static void demoConversion() {
+        Decimal tempInCelsius = 25;
+        String fromUnit = 'Celsius';
+        String toUnit = 'Fahrenheit';
+        
+        Decimal convertedTemp = convertTemperature(tempInCelsius, fromUnit, toUnit);
+        
+        System.debug('Converted ' + tempInCelsius + ' ' + fromUnit + ' to ' + convertedTemp + ' ' + toUnit);
+        
+        // Try other conversions
+        tempInCelsius = 0;
+        fromUnit = 'Celsius';
+        toUnit = 'Kelvin';
+        
+        convertedTemp = convertTemperature(tempInCelsius, fromUnit, toUnit);
+        
+        System.debug('Converted ' + tempInCelsius + ' ' + fromUnit + ' to ' + convertedTemp + ' ' + toUnit);
+    }
+}
+
+
+
+public class MatrixMultiplication {
+    
+    
+    // Method to multiply two matrices
+    public static List<List<Integer>> multiplyMatrices(List<List<Integer>> matrixA, List<List<Integer>> matrixB) {
+        Integer rowsA = matrixA.size();       // Rows of matrix A
+        Integer colsA = matrixA[0].size();    // Columns of matrix A
+        Integer rowsB = matrixB.size();       // Rows of matrix B
+        Integer colsB = matrixB[0].size();    // Columns of matrix B
+
+        // Check if matrix multiplication is possible
+        if (colsA != rowsB) {
+            throw new IllegalArgumentException('Matrix A columns must be equal to Matrix B rows.');
+        }
+
+        // Create a result matrix with the appropriate dimensions
+        List<List<Integer>> resultMatrix = new List<List<Integer>>();
+        
+        // Initialize result matrix with zeroes
+        for (Integer i = 0; i < rowsA; i++) {
+            resultMatrix.add(new List<Integer>());
+            for (Integer j = 0; j < colsB; j++) {
+                resultMatrix[i].add(0);
+            }
+        }
+
+        // Perform matrix multiplication
+        for (Integer i = 0; i < rowsA; i++) {
+            for (Integer j = 0; j < colsB; j++) {
+                for (Integer k = 0; k < colsA; k++) {
+                    resultMatrix[i][j] += matrixA[i][k] * matrixB[k][j];
+                }
+            }
+        }
+        
+        return resultMatrix;
+    }
+    
+    // Method to display the matrix
+    public static void printMatrix(List<List<Integer>> matrix) {
+        for (List<Integer> row : matrix) {
+            System.debug(row);
+        }
+    }
+    
+    // Demo method to show matrix multiplication
+    public static void demoMatrixMultiplication() {
+        // Example matrix A (2x3)
+        List<List<Integer>> matrixA = new List<List<Integer>>{
+            new List<Integer>{1, 2, 3},
+            new List<Integer>{4, 5, 6}
+        };
+
+        // Example matrix B (3x2)
+        List<List<Integer>> matrixB = new List<List<Integer>>{
+            new List<Integer>{7, 8},
+            new List<Integer>{9, 10},
+            new List<Integer>{11, 12}
+        };
+
+        // Multiply the matrices
+        List<List<Integer>> result = multiplyMatrices(matrixA, matrixB);
+
+        // Print the result matrix
+        System.debug('Result of Matrix Multiplication:');
+        printMatrix(result);
+    }
+}
+
+
+
+public class ScientificCalculator {
+
+    // Method for addition
+    public static Decimal add(Decimal num1, Decimal num2) {
+        return num1 + num2;
+    }
+
+    // Method for subtraction
+    public static Decimal subtract(Decimal num1, Decimal num2) {
+        return num1 - num2;
+    }
+
+    // Method for multiplication
+    public static Decimal multiply(Decimal num1, Decimal num2) {
+        return num1 * num2;
+    }
+
+    // Method for division
+    public static Decimal divide(Decimal num1, Decimal num2) {
+        if (num2 == 0) {
+            // Throwing an exception with a meaningful message
+            throw new IllegalArgumentException('Cannot divide by zero.');
+        }
+        return num1 / num2;
+    }
+
+    // Method for square root
+    public static Decimal squareRoot(Decimal num) {
+        if (num < 0) {
+            // Throwing an exception if trying to calculate square root of a negative number
+            throw new IllegalArgumentException('Cannot calculate square root of a negative number.');
+        }
+        return Math.sqrt(num);
+    }
+
+    // Method for calculating power (num raised to the power exponent)
+    public static Decimal power(Decimal num, Decimal exponent) {
+        // Using Double for Math.pow, then casting the result back to Decimal
+        Double result = Math.pow((Double)num, (Double)exponent);
+        return (Decimal)result;
+    }
+
+    // Method for calculating sine (in degrees)
+    public static Decimal sine(Decimal angleInDegrees) {
+        // Convert degrees to radians before calculating sine
+        Decimal angleInRadians = angleInDegrees * Math.PI / 180;
+        return (Decimal)Math.sin((Double)angleInRadians);
+    }
+
+    // Method for calculating cosine (in degrees)
+    public static Decimal cosine(Decimal angleInDegrees) {
+        // Convert degrees to radians before calculating cosine
+        Decimal angleInRadians = angleInDegrees * Math.PI / 180;
+        return (Decimal)Math.cos((Double)angleInRadians);
+    }
+
+    // Method for calculating tangent (in degrees)
+    public static Decimal tangent(Decimal angleInDegrees) {
+        // Convert degrees to radians before calculating tangent
+        Decimal angleInRadians = angleInDegrees * Math.PI / 180;
+        return (Decimal)Math.tan((Double)angleInRadians);
+    }
+
+    // Method for calculating factorial (for positive integers)
+    public static Decimal factorial(Integer num) {
+        if (num < 0) {
+            // Throwing an exception if factorial is requested for a negative number
+            throw new IllegalArgumentException('Factorial is not defined for negative numbers.');
+        }
+        Decimal result = 1;
+        for (Integer i = 1; i <= num; i++) {
+            result *= i;
+        }
+        return result;
+    }
+
+    // Demo method to show usage of the scientific calculator
+    public static void demoScientificCalculator() {
+        try {
+            Decimal num1 = 25;
+            Decimal num2 = 5;
+            Decimal exponent = 2;
+            Decimal angle = 30;
+
+            System.debug('Addition: ' + add(num1, num2));
+            System.debug('Subtraction: ' + subtract(num1, num2));
+            System.debug('Multiplication: ' + multiply(num1, num2));
+            System.debug('Division: ' + divide(num1, num2));
+            System.debug('Square Root: ' + squareRoot(num1));
+            System.debug('Power: ' + power(num1, exponent));
+            System.debug('Sine (30°): ' + sine(angle));
+            System.debug('Cosine (30°): ' + cosine(angle));
+            System.debug('Tangent (30°): ' + tangent(angle));
+            System.debug('Factorial (5!): ' + factorial(5));
+
+        } catch (Exception e) {
+            // Catch any exception that occurs and print the error message
+            System.debug('Error: ' + e.getMessage());
+        }
+    }
+}
+
+
+
+public class PrimeNumberChecker {
+
+    // Method to check if a number is prime
+    public static Boolean isPrime(Integer number1) {
+        // A prime number is greater than 1 and not divisible by any other number except 1 and itself
+        if (number1 <= 1) {
+            return false; // Numbers less than or equal to 1 are not prime
+        }
+        
+        // Check divisibility from 2 to the square root of the number
+        for (Integer i = 2; i <= Math.sqrt(number1); i++) {
+            if (math.mod(number1,i) == 0) {
+                return false; // If divisible, it's not a prime number
+            }
+        }
+        
+        return true; // If no divisors found, it's a prime number
+    }
+
+    // Demo method to show usage
+    public static void demoPrimeChecker() {
+        Integer num1 = 17;
+        Integer num2 = 18;
+
+        System.debug('Is ' + num1 + ' prime? ' + isPrime(num1)); // Expected: true
+        System.debug('Is ' + num2 + ' prime? ' + isPrime(num2)); // Expected: false
+    }
+}
+
+
+public class FibonacciSeries {
+
+    // Method to generate Fibonacci series up to n terms
+    public static List<Integer> generateFibonacci(Integer n) {
+        // Initialize a list to hold the Fibonacci series
+        List<Integer> fibonacciSeries = new List<Integer>();
+        
+        // First two terms of the Fibonacci series
+        Integer first = 0;
+        Integer second = 1;
+
+        // Add the first two terms to the series
+        fibonacciSeries.add(first);
+        fibonacciSeries.add(second);
+        
+        // Generate the rest of the series up to the nth term
+        for (Integer i = 2; i < n; i++) {
+            Integer nextTerm = first + second;  // Calculate the next term
+            fibonacciSeries.add(nextTerm);  // Add it to the list
+            first = second;  // Update first to be second
+            second = nextTerm;  // Update second to be next term
+        }
+        
+        return fibonacciSeries;
+    }
+
+    // Demo method to show usage
+    public static void demoFibonacci() {
+        Integer n = 10; // Number of terms to generate
+        List<Integer> fibonacci = generateFibonacci(n);
+        
+        // Print the Fibonacci series to debug log
+        System.debug('Fibonacci Series up to ' + n + ' terms: ' + fibonacci);
+    }
+}
+
+
+<apex:page controller="CurrencyConverterController">
+    <apex:form >
+        <apex:pageBlock title="Currency Converter">
+            <apex:pageBlockSection columns="2">
+                <apex:outputLabel value="From Currency:" for="fromCurrency" />
+                <apex:selectList value="{!fromCurrency}" size="1" id="fromCurrency">
+                    <apex:selectOptions value="{!currencyOptions}" />
+                </apex:selectList>
+
+                <apex:outputLabel value="To Currency:" for="toCurrency" />
+                <apex:selectList value="{!toCurrency}" size="1" id="toCurrency">
+                    <apex:selectOptions value="{!currencyOptions}" />
+                </apex:selectList>
+
+                <apex:outputLabel value="Amount:" for="amount" />
+                <apex:inputText value="{!amount}" id="amount" />
+            </apex:pageBlockSection>
+
+            <apex:pageBlockButtons >
+                <apex:commandButton value="Convert" action="{!convert}" />
+            </apex:pageBlockButtons>
+
+            <apex:outputText value="{!message}" style="font-weight:bold; font-size:16px; color:green;" />
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>
+
+
+<apex:page controller="InterestCalculatorController">
+    <h1>Interest Calculator</h1>
+    <apex:form >
+        <apex:pageBlock title="Enter Details">
+            <apex:pageBlockSection columns="1">
+                <apex:inputText value="{!principal}" label="Principal Amount"/>
+                <apex:inputText value="{!rate}" label="Rate of Interest (%)"/>
+                <apex:inputText value="{!time1}" label="Time (Years)"/>
+                <apex:commandButton value="Calculate" action="{!calculateInterest}" rerender="results"/>
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+
+        <apex:outputPanel id="results">
+            <apex:pageBlock title="Results" rendered="{!NOT(ISNULL(simpleInterest))}">
+                <apex:pageBlockSection columns="1">
+                    <apex:outputText value="Simple Interest: {!simpleInterest}"/>
+                    <apex:outputText value="Compound Interest: {!compoundInterest}"/>
+                </apex:pageBlockSection>
+            </apex:pageBlock>
+        </apex:outputPanel>
+    </apex:form>
+</apex:page>
+
+
+
