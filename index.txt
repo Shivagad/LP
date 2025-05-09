@@ -1,0 +1,1357 @@
+#include <iostream>
+#include <map>
+#include <queue>
+#include <stack>
+#include <vector>
+using namespace std;
+
+void idsRecursive(pair<string, int> start, pair<string, int> target, map<pair<string, int>, vector<pair<string, int>>> &adj, int maxDepth) {
+    for (int depth = 0; depth <= maxDepth; ++depth) {
+        map<pair<string, int>, bool> vis;
+        vector<pair<pair<string, int>, int>> ansAtDepth;
+
+        dlsRecursive(start, adj, vis, ansAtDepth, 0, depth);
+
+        for (auto node : ansAtDepth) {
+            if (node.first == target) {
+                cout << "Target found: " << node.first.first << " " << node.first.second << " at level " << node.second << endl;
+                return;
+            }
+        }
+    }
+    cout << "Target not found within depth " << maxDepth << endl;
+}
+
+void dlsRecursive(pair<string, int> node, map<pair<string, int>, vector<pair<string, int>>> &adj, map<pair<string, int>, bool> &vis, vector<pair<pair<string, int>, int>> &ans, int level, int depth) {
+    if (level > depth) return;
+    ans.push_back({node, level});
+    vis[node] = true;
+    for (auto neighbor : adj[node]) {
+        if (!vis[neighbor]) {
+            dlsRecursive(neighbor, adj, vis, ans, level + 1, depth);
+        }
+    }
+}
+
+void dlsRecursivebfs(map<pair<string, int>, vector<pair<string, int>>> &adj, map<pair<string, int>, bool> &vis, vector<pair<pair<string, int>, int>> &ans, queue<pair<pair<string, int>, int>> &q, int level, int depth) {
+    if (q.empty() || level > depth) {
+        return;
+    }
+    auto [u, v] = q.front();
+    q.pop();
+    ans.push_back({u, v});
+    for (auto neighbor : adj[u]) {
+        if (!vis[neighbor]) {
+            vis[neighbor] = true;
+            q.push({neighbor, v + 1});
+        }
+    }
+    dlsRecursivebfs(adj, vis, ans, q, level, depth);
+}
+
+void dfsRecursive(pair<string, int> node, map<pair<string, int>, vector<pair<string, int>>> &adj, map<pair<string, int>, bool> &vis, vector<pair<pair<string, int>, int>> &ans, int level) {
+    ans.push_back({node, level});
+    vis[node] = true;
+    for (auto neighbor : adj[node]) {
+        if (!vis[neighbor]) {
+            dfsRecursive(neighbor, adj, vis, ans, level + 1);
+        }
+    }
+}
+
+void dfsNonRecursive(pair<string, int> start, map<pair<string, int>, vector<pair<string, int>>> &adj, vector<pair<pair<string, int>, int>> &ans) {
+    map<pair<string, int>, bool> vis;
+    stack<pair<pair<string, int>, int>> s;
+    s.push({start, 0});
+    while (!s.empty()) {
+        auto [node, level] = s.top();
+        s.pop();
+        if (!vis[node]) {
+            vis[node] = true;
+            ans.push_back({node, level});
+            for (auto nb = adj[node].rbegin(); nb != adj[node].rend(); ++nb) {
+                if (!vis[*nb]) {
+                    s.push({*nb, level + 1});
+                }
+            }
+        }
+    }
+}
+
+void bfsRecursive(map<pair<string, int>, vector<pair<string, int>>> &adj, map<pair<string, int>, bool> &vis, vector<pair<pair<string, int>, int>> &ans, queue<pair<pair<string, int>, int>> &q) {
+    if (q.empty()) {
+        return;
+    }
+    auto [u, v] = q.front();
+    q.pop();
+    ans.push_back({u, v});
+    for (auto neighbor : adj[u]) {
+        if (!vis[neighbor]) {
+            vis[neighbor] = true;
+            q.push({neighbor, v + 1});
+        }
+    }
+    bfsRecursive(adj, vis, ans, q);
+}
+
+void bfsNonRecursive(pair<string, int> start, map<pair<string, int>, vector<pair<string, int>>> &adj, vector<pair<pair<string, int>, int>> &ans, int level) {
+    map<pair<string, int>, bool> vis;
+    queue<pair<pair<string, int>, int>> q;
+    q.push({start, level});
+    vis[start] = true;
+    while (!q.empty()) {
+        auto [u, v] = q.front();
+        q.pop();
+        ans.push_back({u, v});
+        for (auto neighbor : adj[u]) {
+            if (!vis[neighbor]) {
+                vis[neighbor] = true;
+                q.push({neighbor, v + 1});
+            }
+        }
+    }
+}
+
+int main() {
+    int n, m;
+    cout << "Enter the number of students: ";
+    cin >> n;
+    cout << "Enter the number of relationships (edges): ";
+    cin >> m;
+
+    map<pair<string, int>, vector<pair<string, int>>> adj;
+    for (int i = 0; i < m; i++) {
+        string name1, name2;
+        int marks1, marks2;
+        cout << "Enter relationship " << i + 1 << " (name1 marks1 name2 marks2): ";
+        cin >> name1 >> marks1 >> name2 >> marks2;
+        adj[{name1, marks1}].push_back({name2, marks2});
+        adj[{name2, marks2}].push_back({name1, marks1});
+    }
+
+    char ch;
+    do {
+        string startName;
+        int startMarks, choice;
+        cout << "Enter the starting student (name marks): ";
+        cin >> startName >> startMarks;
+        pair<string, int> start = {startName, startMarks};
+
+        cout << "Choose algorithm:\n1) Recursive DFS\n2) Non-Recursive DFS\n3) Recursive BFS\n4) Non-Recursive BFS\n5) Recursive DLS(DFS)\n6) Recursive DLS(BFS)\n";
+        cin >> choice;
+
+        if (choice == 1) {
+            map<pair<string, int>, bool> vis;
+            vector<pair<pair<string, int>, int>> ans1;
+            dfsRecursive(start, adj, vis, ans1, 0);
+            cout << "DFS Recursive traversal:\n";
+            cout << "Student Name  Marks  Level\n";
+            for (auto node : ans1) {
+                if (node.first.second >= 19) {
+                    cout << node.first.first << "  " << node.first.second << "  " << node.second << endl;
+                }
+            }
+            cout << endl;
+        } else if (choice == 2) {
+            vector<pair<pair<string, int>, int>> ans1;
+            dfsNonRecursive(start, adj, ans1);
+            cout << "DFS Non-Recursive traversal:\n";
+            cout << "Student Name  Marks  Level\n";
+            for (auto node : ans1) {
+                if (node.first.second >= 19) {
+                    cout << node.first.first << "  " << node.first.second << "  " << node.second << endl;
+                }
+            }
+            cout << endl;
+        } else if (choice == 3) {
+            map<pair<string, int>, bool> vis;
+            queue<pair<pair<string, int>, int>> q;
+            q.push({start, 0});
+            vis[start] = true;
+            vector<pair<pair<string, int>, int>> ans1;
+            bfsRecursive(adj, vis, ans1, q);
+            cout << "BFS Recursive traversal:\n";
+            cout << "Student Name  Marks  Level\n";
+            for (auto node : ans1) {
+                if (node.first.second >= 19) {
+                    cout << node.first.first << "  " << node.first.second << "  " << node.second << endl;
+                }
+            }
+            cout << endl;
+        } else if (choice == 4) {
+            vector<pair<pair<string, int>, int>> ans1;
+            bfsNonRecursive(start, adj, ans1, 0);
+            cout << "BFS Non-Recursive traversal:\n";
+            cout << "Student Name  Marks  Level\n";
+            for (auto node : ans1) {
+                if (node.first.second >= 19) {
+                    cout << node.first.first << "  " << node.first.second << "  " << node.second << endl;
+                }
+            }
+            cout << endl;
+        } else if (choice == 5) {
+            map<pair<string, int>, bool> vis;
+            int depth;
+            cout << "Enter the max depth: ";
+            cin >> depth;
+            vector<pair<pair<string, int>, int>> ans1;
+            dlsRecursive(start, adj, vis, ans1, 0, depth);
+            cout << "DLS Recursive traversal:\n";
+            cout << "Student Name  Marks  Level\n";
+            for (auto node : ans1) {
+                if (node.first.second >= 19) {
+                    cout << node.first.first << "  " << node.first.second << "  " << node.second << endl;
+                }
+            }
+        } else if (choice == 6) {
+            map<pair<string, int>, bool> vis;
+            queue<pair<pair<string, int>, int>> q;
+            q.push({start, 0});
+            vis[start] = true;
+            int depth;
+            cout << "Enter the max depth: ";
+            cin >> depth;
+            vector<pair<pair<string, int>, int>> ans1;
+            dlsRecursivebfs(adj, vis, ans1, q, 0, depth);
+            cout << "DLS Recursive BFS traversal:\n";
+            cout << "Student Name  Marks  Level\n";
+            for (auto node : ans1) {
+                if (node.first.second >= 19) {
+                    cout << node.first.first << "  " << node.first.second << "  " << node.second << endl;
+                }
+            }
+        } else if (choice == 7) {
+            string targetName;
+            int targetMarks, depth;
+            cout << "Enter the target student to find (name marks): ";
+            cin >> targetName >> targetMarks;
+            cout << "Enter the max depth: ";
+            cin >> depth;
+            pair<string, int> target = {targetName, targetMarks};
+            idsRecursive(start, target, adj, depth);
+        } else {
+            cout << "Invalid choice. Try again.\n";
+            continue;
+        }
+        cout << "Do you want to continue? (Y/N): ";
+        cin >> ch;
+    } while (ch == 'Y' || ch == 'y');
+
+    return 0;
+}
+
+
+
+
+
+
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <set>
+#include <algorithm>
+using namespace std;
+
+const int N = 3;
+const vector<vector<int>> goal = {
+    {1, 2, 3},
+    {4, 5, 6},
+    {7, 8, 0}
+};
+
+
+const vector<pair<int, int>> directions = {
+    {-1, 0}, {1, 0}, {0, -1}, {0, 1}
+};
+
+
+// Convert board to string for visited state tracking
+string boardToString(const vector<vector<int>>& board) {
+    string s;
+    for (auto row : board)
+        for (int val : row)
+            s += to_string(val);
+    return s;
+}
+
+// Heuristic: count misplaced tiles
+int misplacedTiles(const vector<vector<int>>& board) {
+    int count = 0;
+    for (int i = 0; i < N; ++i)
+        for (int j = 0; j < N; ++j)
+            if (board[i][j] != 0 && board[i][j] != goal[i][j])
+                count++;
+    return count;
+}
+
+// Print board
+void printBoard(const vector<vector<int>>& board) {
+    for (auto row : board) {
+        for (int val : row)
+            cout << (val == 0 ? " " : to_string(val)) << " ";
+        cout << endl;
+    }
+    cout << "---------------------\n";
+}
+
+// A* search with simple priority queue and parallel arrays
+void solveAStar(vector<vector<int>> start) {
+    int sx, sy;
+    for (int i = 0; i < N; ++i)
+        for (int j = 0; j < N; ++j)
+            if (start[i][j] == 0)
+                sx = i, sy = j;
+
+    // Priority queue: stores f (g + h) values and index into the below vectors
+    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<>> pq;
+
+    // Parallel vectors to store state info
+    vector<vector<vector<int>>> boards;  // list of board states
+    vector<int> g_values;                // g cost
+    vector<int> x_vals, y_vals;          // blank tile positions
+
+    set<string> visited;
+
+    int h = misplacedTiles(start);
+    boards.push_back(start);
+    g_values.push_back(0);
+    x_vals.push_back(sx);
+    y_vals.push_back(sy);
+
+    pq.push({h, 0}); // {f, index}
+
+    while (!pq.empty()) {
+        auto [f, idx] = pq.top(); pq.pop();
+
+        auto board = boards[idx];
+        int g = g_values[idx];
+        int x = x_vals[idx];
+        int y = y_vals[idx];
+
+        string stateStr = boardToString(board);
+        if (visited.count(stateStr)) continue;
+        visited.insert(stateStr);
+
+        cout << "Step " << g << " | Heuristic (h): " << f - g << " | Total (f = g + h): " << f << endl;
+        printBoard(board);
+
+        if (board == goal) {
+            cout << "✅ Puzzle solved in " << g << " moves.\n";
+            return;
+        }
+
+        for (auto [dx, dy] : directions) {
+            int nx = x + dx, ny = y + dy;
+            if (nx >= 0 && nx < N && ny >= 0 && ny < N) {
+                auto newBoard = board;
+                swap(newBoard[x][y], newBoard[nx][ny]);
+                string newStr = boardToString(newBoard);
+
+                if (!visited.count(newStr)) {
+                    int newG = g + 1;
+                    int newH = misplacedTiles(newBoard);
+                    int newIdx = boards.size();
+
+                    boards.push_back(newBoard);
+                    g_values.push_back(newG);
+                    x_vals.push_back(nx);
+                    y_vals.push_back(ny);
+
+                    pq.push({newG + newH, newIdx});
+                }
+            }
+        }
+    }
+
+    cout << "❌ No solution found.\n";
+}
+
+int main() {
+    vector<vector<int>> start(3, vector<int>(3));
+    cout << "Enter the initial 8-puzzle state (use 0 for blank):\n";
+    for (int i = 0; i < N; ++i)
+        for (int j = 0; j < N; ++j)
+            cin >> start[i][j];
+
+    solveAStar(start);
+    return 0;
+}
+
+
+
+
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <map>
+#include <climits>
+using namespace std;
+
+void dijkstra(map<int, vector<pair<int, int>>> &adj, vector<int> &dist, int src) {
+    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<>> pq;
+    pq.push({0, src});
+    dist[src] = 0;
+
+    while (!pq.empty()) {
+        auto [w, node] = pq.top();
+        pq.pop();
+
+        for (auto &[neighbor, weight] : adj[node]) {
+            if (dist[neighbor] > w + weight) {
+                dist[neighbor] = w + weight;
+                pq.push({dist[neighbor], neighbor});
+            }
+        }
+    }
+}
+
+int main() {
+    int n, m;
+    cout << "Enter number of nodes and edges: ";
+    cin >> n >> m;
+
+    map<int, vector<pair<int, int>>> adj;
+    for (int i = 0; i < m; i++) {
+        int u, v, w;
+        cin >> u >> v >> w;
+        adj[u].push_back({v, w});
+        adj[v].push_back({u, w}); // Remove this line for directed graphs
+    }
+
+    vector<int> dist(n, INT_MAX);
+    dijkstra(adj, dist, 0);
+
+    cout << "Shortest distances from node 0:\n";
+    for (int i = 0; i < n; i++) {
+        cout << "Node " << i << " : " << (dist[i] == INT_MAX ? -1 : dist[i]) << "\n";
+    }
+
+    return 0;
+}
+
+
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <map>
+using namespace std;
+
+void addEdge(map<int, vector<pair<int, int>>>& adj, int u, int v, int wt) {
+    adj[u].push_back({v, wt});
+    adj[v].push_back({u, wt}); // undirected graph
+}
+
+void primMST(int V, map<int, vector<pair<int, int>>>& adj) {
+    // Min-heap: {weight, node, parent}
+    priority_queue<vector<int>, vector<vector<int>>, greater<>> pq;
+
+    map<int, bool> vis;
+    vector<vector<int>> mst; // Each entry: {node, weight, parent}
+    
+    pq.push({0, 0, -1}); // Start from node 0
+
+    while (!pq.empty()) {
+        vector<int> curr = pq.top(); pq.pop();
+        int wt = curr[0], node = curr[1], parent = curr[2];
+
+        if (vis[node]) continue;
+
+        vis[node] = true;
+        mst.push_back({node, wt, parent});
+
+        for (auto [nbr, weight] : adj[node]) {
+            if (!vis[nbr]) {
+                pq.push({weight, nbr, node});
+            }
+        }
+    }
+
+    // Output
+    cout << "Node\tWeight\tParent\n";
+    for (auto& row : mst) {
+        cout << row[0] << "\t" << row[1] << "\t";
+        if (row[2] == -1)
+            cout << "None\n";
+        else
+            cout << row[2] << "\n";
+    }
+}
+
+int main() {
+    int V, E;
+    cout << "Enter number of vertices and edges: ";
+    cin >> V >> E;
+
+    map<int, vector<pair<int, int>>> adj;
+
+    cout << "Enter edges (u v weight):\n";
+    for (int i = 0; i < E; ++i) {
+        int u, v, wt;
+        cin >> u >> v >> wt;
+        addEdge(adj, u, v, wt);
+    }
+
+    cout << "\nMinimum Spanning Tree:\n";
+    primMST(V, adj);
+
+    return 0;
+}
+
+
+
+
+
+
+import streamlit as st
+from thefuzz import process
+import nltk
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+from nltk.stem import WordNetLemmatizer
+import string
+
+# Download NLTK resources (only needed once)
+nltk.download('punkt_tab')
+nltk.download('stopwords')
+nltk.download('wordnet')
+
+# Initialize NLTK components
+lemmatizer = WordNetLemmatizer()
+stop_words = set(stopwords.words('english'))
+
+keyword_responses = {
+    "hello": "Hello! How can I assist you today?",
+    "hours": "We are open from 11 AM to 10 PM daily.",
+    "reservation": "You can make a reservation online or by calling us.",
+    "specials": "Today's special is a vegetarian lasagna.",
+    "vegetarian": "We offer several vegetarian dishes like veggie burgers and salads.",
+    "gluten-free": "Yes, we have gluten-free options available on our menu.",
+    "children's menu": "Yes, we offer a children's menu with kid-friendly meals.",
+    "takeout": "Yes, we offer takeout. You can place an order online or call us directly.",
+    "payment methods": "We accept major credit cards, debit cards, and cash payments.",
+    "parking": "We have a parking lot adjacent to the restaurant for your convenience.",
+    "delivery": "We offer delivery services. You can order through our website or delivery apps.",
+    "waitlist": "If we're fully booked, we have a waitlist. Would you like to be added?",
+    "dress code": "Our dress code is smart casual, but feel free to come as you are!",
+    "cancellation policy": "You can cancel your reservation up to 24 hours before your booking.",
+    "parties": "We can accommodate large parties. Please make a reservation in advance for groups over 8.",
+    "restaurant location": "We are located at 123 Main Street, near the city center.",
+    "wifi": "Yes, we offer free Wi-Fi for all customers.",
+    "cocktails": "Our bar serves a variety of cocktails, including margaritas, mojitos, and martinis.",
+    "events": "We frequently host live music and other events. Check our website for details.",
+    "delivery fee": "There is a small delivery fee depending on your location.",
+    "open": "We are open every day from 11 AM to 10 PM, including weekends.",
+    "reservations required": "It's always best to make a reservation, especially on weekends.",
+    "wait time": "Our average wait time is around 15-20 minutes if we are fully booked.",
+    "dietary restrictions": "Please let us know if you have any dietary restrictions, and we'll try to accommodate you.",
+    "coffee": "We serve a variety of coffee, including espresso, cappuccino, and lattes.",
+    "special deals": "We offer various promotions, including discounts on certain days. Check our website for more details.",
+    "menu": "Our menu includes pasta, pizza, salads, desserts, and drinks. You can ask for more details on each category.",
+}
+
+menu_items = {
+    "pasta": ["Alfredo Pasta", "Pesto Pasta", "Arrabbiata Pasta"],
+    "pizza": ["Margherita Pizza", "Pepperoni Pizza", "Veggie Delight Pizza"],
+    "salads": ["Caesar Salad", "Greek Salad", "Quinoa Salad"],
+    "desserts": ["Tiramisu", "Cheesecake", "Chocolate Lava Cake"],
+    "drinks": ["Lemonade", "Iced Tea", "Espresso"]
+}
+
+# Preprocess text using NLTK
+def preprocess_text(text):
+    # Tokenize
+    tokens = word_tokenize(text.lower())
+    # Remove punctuation
+    tokens = [word for word in tokens if word not in string.punctuation]
+    # Remove stopwords
+    tokens = [word for word in tokens if word not in stop_words]
+    # Lemmatize
+    tokens = [lemmatizer.lemmatize(word) for word in tokens]
+    return " ".join(tokens)
+
+# Enhanced get_response function with NLTK
+def get_response(user_input, last_topic=None):
+    # Preprocess user input
+    processed_input = preprocess_text(user_input)
+    
+    # Handle menu requests
+    if ("tell about" in processed_input or "show menu" in processed_input or 
+        "details" in processed_input) and last_topic == "menu":
+        dishes = []
+        for category, items in menu_items.items():
+            dishes.append(f"{category.title()}: " + ", ".join(items))
+        full_menu = "\n".join(dishes)
+        return f"Here's our full menu:\n\n{full_menu}", "menu"
+    
+    # Check for direct matches with processed input
+    for key in keyword_responses:
+        if key.replace("'", "") in processed_input:
+            return keyword_responses[key], key
+    
+    # Fall back to fuzzy matching if no direct match
+    best_match, match_score = process.extractOne(processed_input, keyword_responses.keys())
+    
+    if match_score >= 60:
+        return keyword_responses[best_match], best_match
+    
+    return "I'm sorry, I couldn't understand that. Could you please rephrase your question?", None
+
+def chatbot_ui():
+    st.title("Restaurant Information Chatbot 🍽")
+    st.write("Welcome to our restaurant! Ask me anything about our menu, reservations, specials, or deals.")
+
+    if 'conversation_history' not in st.session_state:
+        st.session_state['conversation_history'] = []
+    if 'last_topic' not in st.session_state:
+        st.session_state['last_topic'] = None
+    if 'refresh' not in st.session_state:
+        st.session_state['refresh'] = False
+
+    # Text input for the user's message
+    user_input = st.text_input("You:", "")
+
+    # If user has entered input
+    if user_input:
+        response, current_topic = get_response(user_input, st.session_state['last_topic'])
+        
+        # Append user and bot messages to the session state history
+        st.session_state['conversation_history'].append(f"You: {user_input}")
+        st.session_state['conversation_history'].append(f"Bot: {response}")
+        
+        if current_topic:
+            st.session_state['last_topic'] = current_topic
+        
+        # Trigger an update by flipping a session state flag
+        st.session_state['refresh'] = not st.session_state['refresh']
+
+    # Display the entire chat history as a non-editable text area
+    chat_history = "\n".join(st.session_state['conversation_history'])
+    st.text_area("Chat History", value=chat_history, height=300, disabled=True)
+
+if __name__ == "__main__":
+    chatbot_ui()
+
+
+
+
+
+#include <iostream>
+#include <vector>
+#include <string>
+#include <map>
+using namespace std;
+class Employee {
+public:
+    map<string, int> criteria; // Criterion -> score
+    string name;
+    string id;
+    int total_score;
+
+    // Constructor to initialize criteria
+    Employee() : total_score(0) {
+        criteria = {
+            {"Punctuality", 0},
+            {"Quality of Work", 0},
+            {"Teamwork", 0},
+            {"Communication", 0},
+            {"Task Completion", 0}
+        };
+    }
+
+    // Input employee details and scores
+    void input() {
+        cout << "\n===============================\n";
+        cout << "📥 Enter details for new employee\n";
+        cout << "Name: ";
+        cin >> ws; // To consume leading whitespace
+        getline(cin, name);
+        cout << "ID: ";
+        getline(cin, id);
+
+        cout << "\nEvaluating " << name << " (ID: " << id << ")\n";
+        total_score = 0;
+
+        for (auto& criterion : criteria) {
+            int score;
+            while (true) {
+                cout << "Enter score (1-10) for " << criterion.first << ": ";
+                cin >> score;
+                if (score >= 1 && score <= 10) {
+                    criterion.second = score;
+                    total_score += score;
+                    break;
+                } else {
+                    cout << "❗ Invalid score. Please enter between 1 to 10.\n";
+                }
+            }
+        }
+    }
+
+    // Expert system logic for performance evaluation
+    pair<string, string> evaluate() {
+        // Knowledge-based inference rules
+        if (total_score >= 45) {
+            return {"🌟 Outstanding", "Strongly recommend promotion and leadership roles"};
+        } else if (total_score >= 38) {
+            return {"👍 Good", "Eligible for bonus or recognition"};
+        } else if (total_score >= 30) {
+            return {"🛠 Needs Improvement", "Enroll in upskilling programs"};
+        } else {
+            return {"⚠ Critical", "Schedule performance review and mentorship"};
+        }
+    }
+    
+
+    // Generate specific advice based on weak criteria
+    vector<string> expertAdvice() {
+        vector<string> suggestions;
+        for (const auto& [key, val] : criteria) {
+            if (val < 5) {
+                suggestions.push_back("Improve " + key + " (scored " + to_string(val) + ")");
+            }
+        }
+        return suggestions;
+    }
+
+    // Display results
+    void display() {
+        cout << "\n📊 Evaluation Summary\n";
+        cout << "Name          : " << name << endl;
+        cout << "ID            : " << id << endl;
+        cout << "Total Score   : " << total_score << " / 50" << endl;
+
+        auto [performance, suggestion] = evaluate();
+        cout << "Performance   : " << performance << endl;
+        cout << "System Advice : " << suggestion << endl;
+
+        auto adviceList = expertAdvice();
+        if (!adviceList.empty()) {
+            cout << "⚙ Expert Suggestions:\n";
+            for (const auto& advice : adviceList) {
+                cout << "  - " << advice << endl;
+            }
+        }
+        cout << string(40, '-') << endl;
+    }
+};
+
+int main() {
+    vector<Employee> emp_list;
+    int n;
+
+    cout << "👔 Welcome to the Employee Evaluation Expert System\n";
+    cout << "Enter number of employees to evaluate: ";
+    cin >> n;
+
+    for (int i = 0; i < n; ++i) {
+        Employee e;
+        e.input();
+        e.display();
+        emp_list.push_back(e);
+    }
+
+    // Identify top scorer(s)
+    int max_score = 0;
+    for (const auto& e : emp_list) {
+        if (e.total_score > max_score) {
+            max_score = e.total_score;
+        }
+    }
+
+    cout << "\n🏅 Top Performers (Score: " << max_score << ")\n";
+    for (const auto& e : emp_list) {
+        if (e.total_score == max_score) {
+            cout << " - " << e.name << " (ID: " << e.id << ")\n";
+        }
+    }
+
+    return 0;
+}
+
+
+
+#include <iostream>
+#include <string>
+#include <vector>
+#include <map>
+#include <iomanip>
+#include <limits>
+
+using namespace std;
+
+// Simple Employee Performance Evaluation System
+
+class EmployeeSystem {
+public:
+    // Data structures using simple structs instead of classes
+    struct Employee {
+        string id;
+        string name;
+        string position;
+        string department;
+        map<string, int> scores;       // Criterion name -> score
+        map<string, string> comments;  // Criterion name -> comment
+    };
+    // Main data
+    vector<Employee> employees;
+    map<string, double> criteria_weights;  // Criterion name -> weight
+    map<string, string> criteria_desc;     // Criterion name -> description
+
+    // Initialize the system with default criteria
+    void init() {
+        // Add default criteria
+        criteria_weights["Productivity"] = 0.25;
+        criteria_desc["Productivity"] = "Work output and efficiency";
+        
+        criteria_weights["Quality"] = 0.25;
+        criteria_desc["Quality"] = "Accuracy and thoroughness of work";
+        
+        criteria_weights["Communication"] = 0.15;
+        criteria_desc["Communication"] = "Effectiveness in verbal and written communications";
+        
+        criteria_weights["Team Collaboration"] = 0.15;
+        criteria_desc["Team Collaboration"] = "Ability to work effectively with others";
+        
+        criteria_weights["Initiative"] = 0.20;
+        criteria_desc["Initiative"] = "Self-direction and proactive problem-solving";
+    }
+    
+    // Add a new employee
+    void addEmployee(string id, string name, string position, string department) {
+        Employee emp;
+        emp.id = id;
+        emp.name = name;
+        emp.position = position;
+        emp.department = department;
+        employees.push_back(emp);
+    }
+    
+    // Rate an employee on a criterion
+    void rateEmployee(string emp_id, string criterion, int score, string comment) {
+        if (score < 1 || score > 5) {
+            cout << "Error: Score must be between 1 and 5" << endl;
+            return;
+        }
+        
+        // Find the employee
+        for (auto& emp : employees) {
+            if (emp.id == emp_id) {
+                emp.scores[criterion] = score;
+                emp.comments[criterion] = comment;
+                return;
+            }
+        }
+        
+        cout << "Error: Employee not found" << endl;
+    }
+    
+    // Calculate overall score for an employee
+    double calculateOverallScore(string emp_id) {
+        for (auto& emp : employees) {
+            if (emp.id == emp_id) {
+                double overall = 0.0;
+                double weight_sum = 0.0;
+                
+                for (auto& criterion : criteria_weights) {
+                    string crit_name = criterion.first;
+                    double weight = criterion.second;
+                    
+                    if (emp.scores.find(crit_name) != emp.scores.end()) {
+                        overall += emp.scores[crit_name] * weight;
+                        weight_sum += weight;
+                    }
+                }
+                
+                if (weight_sum > 0) {
+                    return overall / weight_sum;
+                }
+                return 0.0;
+            }
+        }
+        return 0.0;
+    }
+    
+    // Get performance tier based on score
+    string getPerformanceTier(double score) {
+        if (score >= 4.5) return "Outstanding";
+        if (score >= 3.5) return "Exceeds Expectations";
+        if (score >= 2.5) return "Meets Expectations";
+        if (score >= 1.5) return "Needs Improvement";
+        return "Unsatisfactory";
+    }
+    
+    // Get feedback based on criterion and score
+    string getFeedback(string criterion, int score) {
+        if (criterion == "Productivity") {
+            switch (score) {
+                case 1: return "Shows significant difficulty meeting basic productivity expectations.";
+                case 2: return "Often falls below expectations in terms of work output.";
+                case 3: return "Meets standard productivity requirements consistently.";
+                case 4: return "Frequently exceeds productivity expectations.";
+                case 5: return "Demonstrates exceptional productivity that consistently exceeds expectations.";
+            }
+        } else if (criterion == "Quality") {
+            switch (score) {
+                case 1: return "Work frequently contains errors and requires substantial rework.";
+                case 2: return "Work sometimes meets quality standards but improvement is needed.";
+                case 3: return "Consistently delivers work that meets quality standards.";
+                case 4: return "Produces high-quality work with minimal errors.";
+                case 5: return "Delivers outstanding quality work that can serve as a benchmark for others.";
+            }
+        } else if (criterion == "Communication") {
+            switch (score) {
+                case 1: return "Shows significant difficulties in communication that impact work effectiveness.";
+                case 2: return "Communication is sometimes unclear or ineffective.";
+                case 3: return "Communicates adequately with colleagues and stakeholders.";
+                case 4: return "Demonstrates strong communication skills that enhance team dynamics.";
+                case 5: return "Exceptional communicator who excels at conveying complex information.";
+            }
+        } else if (criterion == "Team Collaboration") {
+            switch (score) {
+                case 1: return "Has difficulty working effectively with team members.";
+                case 2: return "Sometimes collaborates effectively but improvement is needed.";
+                case 3: return "Works well with team members to achieve shared goals.";
+                case 4: return "Frequently enhances team dynamics and helps others succeed.";
+                case 5: return "Exceptional team player who significantly elevates team performance.";
+            }
+        } else if (criterion == "Initiative") {
+            switch (score) {
+                case 1: return "Rarely demonstrates initiative and requires constant direction.";
+                case 2: return "Occasionally shows initiative but often waits for instructions.";
+                case 3: return "Shows appropriate initiative in daily responsibilities.";
+                case 4: return "Frequently identifies and acts on opportunities for improvement.";
+                case 5: return "Demonstrates exceptional initiative that creates significant value.";
+            }
+        }
+        return "No feedback available.";
+    }
+    
+    // Get improvement suggestion based on criterion and score
+    string getImprovement(string criterion, int score) {
+        if (criterion == "Productivity") {
+            switch (score) {
+                case 1: return "Consider time management training and breaking tasks into smaller goals.";
+                case 2: return "Identify productivity bottlenecks. Try timeboxing and prioritization methods.";
+                case 3: return "Continue meeting expectations while looking for efficiency improvements.";
+                case 4: return "Share productivity techniques with team members. Look for automation opportunities.";
+                case 5: return "Consider mentoring others on productivity. Balance workload to maintain quality.";
+            }
+        } else if (criterion == "Quality") {
+            switch (score) {
+                case 1: return "Implement a personal quality checklist. Seek frequent feedback during work.";
+                case 2: return "Establish review procedures before submission. Allocate more time for quality checks.";
+                case 3: return "Document successful processes to ensure consistency. Consider peer reviews.";
+                case 4: return "Look for opportunities to establish quality standards for others.";
+                case 5: return "Share quality assurance techniques with the team. Consider leading quality initiatives.";
+            }
+        } else if (criterion == "Communication") {
+            switch (score) {
+                case 1: return "Consider communication skills training. Practice active listening and seek feedback.";
+                case 2: return "Prepare key points before communications. Ask clarifying questions more frequently.";
+                case 3: return "Continue developing skills by seeking opportunities to present and facilitate discussions.";
+                case 4: return "Share communication best practices with team members. Consider leading presentations.";
+                case 5: return "Consider mentoring others in effective communication.";
+            }
+        } else if (criterion == "Team Collaboration") {
+            switch (score) {
+                case 1: return "Schedule regular check-ins with team members. Actively seek ways to support team goals.";
+                case 2: return "Improve collaboration by actively participating and offering assistance.";
+                case 3: return "Continue fostering positive team relationships. Align individual and team goals.";
+                case 4: return "Share collaboration techniques with team members.Consider team building activities.";
+                case 5: return "Continue exemplary collaboration while developing team members' collaborative skills.";
+            }
+        } else if (criterion == "Initiative") {
+            switch (score) {
+                case 1: return "Start by identifying one area where you can take more initiative.";
+                case 2: return "Look for opportunities to suggest improvements. Take ownership of smaller projects.";
+                case 3: return "Continue showing initiative while identifying higher-impact areas for improvement.";
+                case 4: return "Look for strategic initiatives that align with department goals.";
+                case 5: return "Continue exceptional initiative while developing leadership skills.";
+            }
+        }
+        return "No specific improvement suggestions available.";
+    }
+
+
+    // Print list of all employees
+    void listEmployees() {
+        cout << "\n===== EMPLOYEE LIST =====" << endl;
+        for (auto& emp : employees) {
+            cout << "ID: " << emp.id << " | Name: " << emp.name << " | Position: " << emp.position << endl;
+        }
+        cout << "=========================" << endl;
+    }
+    
+    // Generate and print evaluation report for an employee
+    void generateReport(string emp_id) {
+        // Find the employee
+        bool found = false;
+        Employee emp;
+        
+        for (auto& e : employees) {
+            if (e.id == emp_id) {
+                emp = e;
+                found = true;
+                break;
+            }
+        }
+        
+        if (!found) {
+            cout << "Error: Employee not found" << endl;
+            return;
+        }
+        
+        double overall = calculateOverallScore(emp_id);
+        string tier = getPerformanceTier(overall);
+        
+        cout << "\n=============================================================" << endl;
+        cout << "             PERFORMANCE EVALUATION REPORT                   " << endl;
+        cout << "=============================================================" << endl;
+        cout << "Employee ID: " << emp.id << endl;
+        cout << "Name: " << emp.name << endl;
+        cout << "Position: " << emp.position << endl;
+        cout << "Department: " << emp.department << endl;
+        cout << "-------------------------------------------------------------" << endl;
+        cout << "PERFORMANCE RATINGS:" << endl;
+        cout << "-------------------------------------------------------------" << endl;
+        
+        for (auto& crit : criteria_weights) {
+            string name = crit.first;
+            double weight = crit.second;
+            
+            if (emp.scores.find(name) != emp.scores.end()) {
+                int score = emp.scores[name];
+                string comment = emp.comments[name];
+                
+                cout << name << " (" << weight * 100 << "%): " << score << "/5" << endl;
+                cout << "Comment: " << comment << endl;
+                cout << "Feedback: " << getFeedback(name, score) << endl;
+                cout << "Improvement: " << getImprovement(name, score) << endl;
+                cout << endl;
+            }
+        }
+        
+        cout << "-------------------------------------------------------------" << endl;
+        cout << "OVERALL ASSESSMENT:" << endl;
+        cout << "-------------------------------------------------------------" << endl;
+        cout << "Overall Rating: " << fixed << setprecision(2) << overall << "/5.00" << endl;
+        cout << "Performance Tier: " << tier << endl;
+        cout << "=============================================================" << endl;
+    }
+};
+
+int main() {
+    EmployeeSystem system;
+    
+    system.init();
+    
+    // Add some sample employees
+    system.addEmployee("E001", "Alice", "Software Engineer", "Development");
+    system.addEmployee("E002", "Bob", "Data Scientist", "Data");
+    
+    // Example of rating employees
+    system.rateEmployee("E001", "Productivity", 4, "Consistently meets deadlines.");
+    system.rateEmployee("E001", "Quality", 5, "Work quality is always excellent.");
+    system.rateEmployee("E002", "Communication", 3, "Communicates effectively but room for improvement.");
+    
+    // Generate reports
+    system.generateReport("E001");
+    system.generateReport("E002");
+    
+    return 0;
+}
+
+
+
+class MedicalExpertSystem:
+    def __init__(self):
+        self.conditions = {
+            "Cardiologist": {
+                "symptoms": {
+                    "chest pain": 3,
+                    "high blood pressure": 3,
+                    "irregular heartbeat": 3,
+                    "shortness of breath": 3,
+                    "fatigue": 2,
+                    "dizziness": 2,
+                    "swelling in legs": 2,
+                    "cold sweats": 3
+                },
+                "risk_factors": ["smoking", "diabetes", "high cholesterol", "obesity"],
+                "advice": "Consult a cardiologist for heart health. Maintain a low-sodium diet, exercise regularly, and monitor blood pressure."
+            },
+            "Pulmonologist": {
+                "symptoms": {
+                    "shortness of breath": 3,
+                    "persistent cough": 3,
+                    "asthma": 3,
+                    "wheezing": 3,
+                    "chronic bronchitis": 3,
+                    "chest tightness": 3,
+                    "coughing up blood": 4
+                },
+                "risk_factors": ["smoking", "air pollution exposure", "family history of lung disease"],
+                "advice": "Visit a pulmonologist. Avoid smoke and allergens, and consider a lung function test."
+            },
+            "Neurologist": {
+                "symptoms": {
+                    "severe headache": 3,
+                    "dizziness": 3,
+                    "memory loss": 4,
+                    "numbness": 3,
+                    "migraine": 3,
+                    "seizures": 4,
+                    "vision disturbances": 3
+                },
+                "risk_factors": ["stroke history", "brain injury", "chronic migraines"],
+                "advice": "Consult a neurologist. Ensure proper hydration, sleep, and stress management."
+            },
+            "Orthopedic": {
+                "symptoms": {
+                    "joint pain": 3,
+                    "back pain": 3,
+                    "bone fracture": 4,
+                    "knee pain": 3,
+                    "stiffness": 2,
+                    "swollen joints": 3,
+                    "difficulty walking": 3
+                },
+                "risk_factors": ["osteoporosis", "previous fractures", "high-impact sports"],
+                "advice": "Visit an orthopedic doctor. Maintain calcium intake and avoid excessive strain on joints."
+            },
+            "Endocrinologist": {
+                "symptoms": {
+                    "frequent urination": 3,
+                    "unexplained weight loss": 3,
+                    "excessive thirst": 3,
+                    "hormonal imbalance": 3,
+                    "irregular periods": 3,
+                    "hair loss": 2,
+                    "extreme fatigue": 3
+                },
+                "risk_factors": ["diabetes", "thyroid disorders", "polycystic ovary syndrome"],
+                "advice": "Consult an endocrinologist. Monitor blood sugar and hormone levels regularly."
+            },
+            "General Physician": {
+                "symptoms": {
+                    "fever": 2,
+                    "body ache": 2,
+                    "fatigue": 2,
+                    "weakness": 2,
+                    "mild headache": 2,
+                    "sore throat": 2,
+                    "cough": 2
+                },
+                "risk_factors": [],
+                "advice": "See a general physician. Stay hydrated and rest well."
+            },
+        }
+
+        self.severity_levels = {
+            "mild": "Monitor your symptoms and take rest. If they persist, consult a doctor.",
+            "moderate": "Consider booking an appointment soon for a check-up.",
+            "severe": "Seek immediate medical attention as the condition may require urgent care."
+        }
+
+        # Indian doctors and cities
+        self.specialist_database = {
+            "Mumbai": {
+                "Cardiologist": ["Dr. Rajesh Shah - Fortis Mumbai", "Dr. Pooja Mehta - Lilavati Hospital"],
+                "Pulmonologist": ["Dr. Anil Deshmukh - Breather's Care Mumbai", "Dr. Nisha Agarwal - Hinduja Hospital"],
+                "Neurologist": ["Dr. Suresh Patil - NeuroCare Mumbai", "Dr. Sneha Iyer - Kokilaben Hospital"]
+            },
+            "Delhi": {
+                "Cardiologist": ["Dr. Ramesh Gupta - AIIMS Delhi", "Dr. Alok Verma - Max Hospital"],
+                "Orthopedic": ["Dr. Vikram Ahuja - Apollo Delhi", "Dr. Anjali Sharma - Medanta Delhi"],
+                "Endocrinologist": ["Dr. Manish Tandon - BLK Hospital", "Dr. Neha Kapoor - Fortis Delhi"]
+            },
+            "Bangalore": {
+                "Pulmonologist": ["Dr. Ravi Kumar - Manipal Bangalore", "Dr. Sunita Rao - Columbia Asia"],
+                "Neurologist": ["Dr. Arvind Menon - NIMHANS", "Dr. Lakshmi Reddy - Sakra Hospital"]
+            },
+            "Hyderabad": {
+                "Cardiologist": ["Dr. Srikanth Reddy - Yashoda Hyderabad", "Dr. Kavita Jain - Apollo Hyderabad"],
+                "Orthopedic": ["Dr. Aditya Sharma - Sunshine Hospital", "Dr. Priya Desai - Care Hospital"]
+            },
+            "Chennai": {
+                "Pulmonologist": ["Dr. Mohan Babu - Global Hospitals", "Dr. Sangeeta Narayan - MGM Healthcare"],
+                "Neurologist": ["Dr. Karthik Balaji - SIMS Hospital", "Dr. Anuradha Iyengar - Fortis Chennai"]
+            }
+        }    
+    def get_specialists(self, symptoms, risk_factors):
+        specialist_scores = {}
+
+        for specialist, details in self.conditions.items():
+            score = 0
+            matched_symptoms = []
+            matched_risks = list(set(risk_factors) & set(details["risk_factors"]))
+
+            for symptom in symptoms:
+                if symptom in details["symptoms"]:
+                    score += details["symptoms"][symptom]
+                    matched_symptoms.append(symptom)
+
+            if matched_risks:
+                score += len(matched_risks)
+
+            if score > 0:
+                specialist_scores[specialist] = {
+                    "score": score,
+                    "matched_symptoms": matched_symptoms,
+                    "matched_risks": matched_risks,
+                    "advice": details["advice"]
+                }
+
+        return specialist_scores
+
+    def determine_severity(self, total_score):
+        if total_score <= 4:
+            return "mild"
+        elif 5 <= total_score <= 8:
+            return "moderate"
+        else:
+            return "severe"
+
+    def find_fixed_nearby_specialists(self, specialist_type, location):
+        city_specialists = self.specialist_database.get(location, {})
+        return city_specialists.get(specialist_type, ["No available specialists found in this location."])
+
+    def run_system(self):
+        print("\n🏥 Welcome to the Indian Medical Expert System!")
+        print("Enter your symptoms separated by commas (e.g., chest pain, dizziness, fatigue):")
+        user_symptoms = input().strip().lower().split(",")
+    
+        print("\nEnter risk factors (if any) separated by commas:")
+        user_risks = input().strip().lower().split(",")
+        symptoms = user_symptoms  
+        risk_factors = user_risks  
+
+        specialists = self.get_specialists(symptoms, risk_factors)
+        total_score = sum(details["score"] for details in specialists.values())
+        severity_level = self.determine_severity(total_score)
+
+        if specialists:
+            for specialist, details in sorted(specialists.items(), key=lambda x: x[1]['score'], reverse=True):
+                print(f"\n✅ {specialist} - {details['advice']}")
+                location = input(f"\n📍 Enter your city to find {specialist}s nearby: ").strip()
+                print(f"\n🏥 Nearby {specialist}s in {location}: {', '.join(self.find_fixed_nearby_specialists(specialist, location))}")
+
+            print(f"\n⚠️ Severity Level: {severity_level.capitalize()} - {self.severity_levels[severity_level]}")
+        else:
+            print("\n⚠️ No specialist detected. Visit a General Physician first.")
+
+if __name__ == "__main__":
+    system = MedicalExpertSystem()
+    system.run_system()
+
+
+
+
+
+class Employee:
+    def __init__(self):
+        self.criteria={
+            "Punctuality":0,
+            "Quality of Work":0,
+            "Teamwork":0,
+            "Communication":0,
+            "Task Completion":0
+        }
+        self.name=""
+        self.id=""
+        self.total_score=0
+    def input(self):
+        self.name = input("Enter the name of the employee: ")
+        self.id = input("Enter the ID of the employee: ")
+        print(f"\nEvaluating {self.name} (ID: {self.id})")
+        print("Enter the score between 1 to 10 for each criterion:")
+        self.total_score=0
+        for i in self.criteria:
+            while True:
+                score=int(input(f"{i}:"))
+                if(score>=1 and score<=10):
+                    self.criteria[i]=score
+                    self.total_score+=score
+                    break
+                else:
+                    print("Enter score between 1 to 10")
+        return self.total_score          
+    def evaluate(self,total_score):
+        if(total_score>=42):
+            return "Excellent","Eligible for promotion"
+        elif(total_score>=35):
+            return "Good","Consider recognition"
+        else:
+            return "Needs Improvement","Recommend training"
+    def display(self, total_score):
+        print("\n📊 Evaluation Results")
+        print(f"  Employee Name : {self.name}")
+        print(f"  Employee ID   : {self.id}")
+        print(f"  Total Score   : {self.total_score}")
+        level, advice = self.evaluate(self.total_score)
+        print(f"  Performance   : {level}")
+        print(f"  Suggestion    : {advice}")
+        print("-" * 40)
+emp_list=[]        
+emp=int(input("Enter the number of employees you want to evaluate"))
+for i in range(emp):
+    e=Employee()
+    score=e.input()
+    e.display(score)
+    emp_list.append(e)
+max_score=0
+for i in emp_list:
+    max_score=max(max_score,i.total_score)
+best_employees=[]
+for i in emp_list:
+    if(max_score==i.total_score):
+        best_employees.append(i)
+print(f"Following are the best employee with score{max_score}")
+for i in best_employees:
+    print(f"Best Empoloyee is:{i.name}")        
+    
+
+
+
+#include <iostream>
+#include <vector>
+using namespace std;
+
+void selectionSort(vector<int>& arr) {
+    int n = arr.size();
+
+    for (int i = 0; i < n - 1; i++) {
+        int minIndex = i;
+
+        // Find the index of the minimum element
+        for (int j = i + 1; j < n; j++) {
+            if (arr[j] < arr[minIndex]) {
+                minIndex = j;
+            }
+        }
+
+        // Swap the found minimum with the first unsorted element
+        if (minIndex != i) {
+            swap(arr[i], arr[minIndex]);
+        }
+    }
+}
+
+int main() {
+    vector<int> arr = {64, 25, 12, 22, 11};
+
+    cout << "Original array: ";
+    for (int num : arr)
+        cout << num << " ";
+    cout << endl;
+
+    selectionSort(arr);
+
+    cout << "Sorted array: ";
+    for (int num : arr)
+        cout << num << " ";
+    cout << endl;
+
+    return 0;
+}
+
